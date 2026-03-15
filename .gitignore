@@ -1,15 +1,77 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# =========================
+# Gradle
+# =========================
+.gradle/
+build/
+*/build/
+
+# =========================
+# Local config
+# =========================
 local.properties
+
+# =========================
+# Android Studio / IntelliJ
+# =========================
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Keystore / Signing
+# =========================
+*.jks
+*.keystore
+keystore.properties
+
+# =========================
+# APK / Bundle
+# =========================
+*.apk
+*.aab
+
+# =========================
+# Native build
+# =========================
+.externalNativeBuild/
+.cxx/
+
+# =========================
+# Kotlin
+# =========================
+.kotlin/
+
+# =========================
+# Firebase / Google
+# =========================
+google-services.json
+
+# =========================
+# Temp
+# =========================
+captures/
+tmp/
+temp/
+
+# =========================
+# Navigation SafeArgs
+# =========================
+.navigation/
+
+# =========================
+# Secrets
+# =========================
+*.properties
+!gradle.properties
