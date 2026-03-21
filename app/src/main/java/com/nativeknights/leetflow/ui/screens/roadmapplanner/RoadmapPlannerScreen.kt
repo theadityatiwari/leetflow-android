@@ -25,6 +25,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.nativeknights.leetflow.ui.theme.*
 
+private val RoadmapPink = Color(0xFFF9A8D4)
+private val RoadmapPinkBg = Color(0xFF831843)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoadmapPlannerScreen(
@@ -56,7 +59,7 @@ fun RoadmapPlannerScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = BackgroundCard,
-                    titleContentColor = PurpleText,
+                    titleContentColor = RoadmapPink,
                     navigationIconContentColor = TextPrimary
                 )
             )
@@ -146,11 +149,11 @@ private fun TopicInputView(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = BackgroundCard,
                 unfocusedContainerColor = BackgroundCard,
-                focusedBorderColor = PurpleText,
+                focusedBorderColor = RoadmapPink,
                 unfocusedBorderColor = CardBorder,
                 focusedTextColor = TextPrimary,
                 unfocusedTextColor = TextPrimary,
-                cursorColor = PurpleText
+                cursorColor = RoadmapPink
             ),
             shape = RoundedCornerShape(12.dp)
         )
@@ -180,12 +183,12 @@ private fun TopicInputView(
                         colors = FilterChipDefaults.filterChipColors(
                             containerColor = CardElevated,
                             labelColor = TextSecondary,
-                            selectedContainerColor = PurpleText.copy(alpha = 0.2f),
-                            selectedLabelColor = PurpleText
+                            selectedContainerColor = RoadmapPink.copy(alpha = 0.2f),
+                            selectedLabelColor = RoadmapPink
                         ),
                         border = BorderStroke(
                             1.dp,
-                            if (topic == suggestedTopic) PurpleText else CardBorder
+                            if (topic == suggestedTopic) RoadmapPink else CardBorder
                         )
                     )
                 }
@@ -199,8 +202,8 @@ private fun TopicInputView(
             modifier = Modifier.fillMaxWidth().height(54.dp),
             enabled = topic.isNotBlank(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = PurpleText,
-                disabledContainerColor = PurpleText.copy(alpha = 0.5f)
+                containerColor = RoadmapPink,
+                disabledContainerColor = RoadmapPink.copy(alpha = 0.5f)
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -218,7 +221,7 @@ private fun LoadingView() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            CircularProgressIndicator(modifier = Modifier.size(48.dp), color = PurpleText)
+            CircularProgressIndicator(modifier = Modifier.size(48.dp), color = RoadmapPink)
             Text(text = "Creating your roadmap...", fontSize = 16.sp, color = TextTertiary)
         }
     }
@@ -236,17 +239,17 @@ private fun RoadmapView(
     ) {
         item {
             Card(
-                colors = CardDefaults.cardColors(containerColor = PurpleBg.copy(alpha = 0.2f)),
+                colors = CardDefaults.cardColors(containerColor = RoadmapPinkBg.copy(alpha = 0.2f)),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, PurpleBg.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                        .border(1.dp, RoadmapPinkBg.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
                         .padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(text = plan.topic, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = PurpleText)
+                    Text(text = plan.topic, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = RoadmapPink)
                     
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -403,7 +406,7 @@ private fun PatternCard(pattern: PatternGroup) {
                 
                 if (pattern.estimatedProblems.isNotEmpty()) {
                     Surface(
-                        color = PurpleBg.copy(alpha = 0.15f),
+                        color = RoadmapPinkBg.copy(alpha = 0.15f),
                         shape = RoundedCornerShape(6.dp)
                     ) {
                         Text(
@@ -411,7 +414,7 @@ private fun PatternCard(pattern: PatternGroup) {
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
-                            color = PurpleText
+                            color = RoadmapPink
                         )
                     }
                 }

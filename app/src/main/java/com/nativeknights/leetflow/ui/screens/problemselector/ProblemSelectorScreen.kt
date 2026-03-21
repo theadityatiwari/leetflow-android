@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nativeknights.leetflow.ui.screens.problemselector.components.RecommendationCard
+import com.nativeknights.leetflow.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,13 +57,13 @@ fun ProblemSelectorScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF111827), // gray-900
-                    titleContentColor = Color(0xFF3B82F6), // primary blue
-                    navigationIconContentColor = Color.White
+                    containerColor = BackgroundCard,
+                    titleContentColor = PrimaryBlue,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         },
-        containerColor = Color(0xFF0F172A) // slate-900
+        containerColor = BackgroundPrimary
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -77,7 +78,7 @@ fun ProblemSelectorScreen(
             Text(
                 text = "Don't know what to solve? Let AI decide based on your gaps.",
                 fontSize = 15.sp,
-                color = Color(0xFF9CA3AF),
+                color = TextTertiary,
                 lineHeight = 22.sp
             )
             
@@ -122,7 +123,7 @@ fun ProblemSelectorScreen(
                                     },
                                     modifier = Modifier.weight(1f).height(56.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(0xFF059669) // green-600
+                                        containerColor = SuccessGreen
                                     ),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
@@ -144,8 +145,8 @@ fun ProblemSelectorScreen(
                                     onClick = viewModel::rerollRecommendation,
                                     modifier = Modifier.height(56.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(
-                                        containerColor = Color(0xFF374151), // gray-700
-                                        contentColor = Color(0xFFD1D5DB)
+                                        containerColor = CardElevated,
+                                        contentColor = TextSecondary
                                     ),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
@@ -186,27 +187,27 @@ private fun InputSection(
                 text = "Any specific constraint? (Optional)",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFFD1D5DB)
+                color = TextSecondary
             )
-            
+
             OutlinedTextField(
                 value = preference,
                 onValueChange = onPreferenceChange,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { 
+                placeholder = {
                     Text(
                         text = "e.g., 'Only 20 mins', 'Focus on Graphs', 'Hard DP only'",
-                        color = Color(0xFF6B7280)
+                        color = TextDisabled
                     )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF111827),
-                    unfocusedContainerColor = Color(0xFF111827),
-                    focusedBorderColor = Color(0xFF3B82F6),
-                    unfocusedBorderColor = Color(0xFF374151),
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    cursorColor = Color(0xFF3B82F6)
+                    focusedContainerColor = BackgroundCard,
+                    unfocusedContainerColor = BackgroundCard,
+                    focusedBorderColor = PrimaryBlue,
+                    unfocusedBorderColor = CardBorder,
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
+                    cursorColor = PrimaryBlue
                 ),
                 shape = RoundedCornerShape(12.dp)
             )
@@ -219,7 +220,7 @@ private fun InputSection(
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF3B82F6) // primary blue
+                containerColor = PrimaryBlue
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -243,7 +244,7 @@ private fun LoadingSection() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1F2937)
+            containerColor = CardElevated
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -256,12 +257,12 @@ private fun LoadingSection() {
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.size(48.dp),
-                color = Color(0xFF3B82F6)
+                color = PrimaryBlue
             )
             Text(
                 text = "Analyzing Gaps...",
                 fontSize = 16.sp,
-                color = Color(0xFF9CA3AF)
+                color = TextTertiary
             )
         }
     }
@@ -275,7 +276,7 @@ private fun ErrorSection(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF7F1D1D).copy(alpha = 0.2f)
+            containerColor = ErrorRedBg.copy(alpha = 0.2f)
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -293,12 +294,12 @@ private fun ErrorSection(
             Text(
                 text = message,
                 fontSize = 15.sp,
-                color = Color(0xFFFCA5A5)
+                color = ErrorRedText
             )
             Button(
                 onClick = onRetry,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF3B82F6)
+                    containerColor = PrimaryBlue
                 )
             ) {
                 Text("Try Again")

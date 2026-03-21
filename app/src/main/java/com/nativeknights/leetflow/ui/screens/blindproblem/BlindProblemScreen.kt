@@ -63,7 +63,7 @@ fun BlindProblemScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = BackgroundCard,
-                    titleContentColor = ErrorRedText,
+                    titleContentColor = PurpleText,
                     navigationIconContentColor = TextPrimary
                 )
             )
@@ -127,14 +127,14 @@ private fun HeroSection() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = ErrorRedBg.copy(alpha = 0.15f)
+            containerColor = PurpleBg.copy(alpha = 0.15f)
         ),
         shape = RoundedCornerShape(20.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, ErrorRed.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+                .border(1.dp, PurpleText.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
                 .padding(24.dp)
         ) {
             // Decorative background
@@ -146,7 +146,7 @@ private fun HeroSection() {
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(
-                                ErrorRed.copy(alpha = 0.2f),
+                                PurpleText.copy(alpha = 0.2f),
                                 Color.Transparent
                             )
                         ),
@@ -162,7 +162,7 @@ private fun HeroSection() {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Surface(
-                        color = ErrorRed.copy(alpha = 0.2f),
+                        color = PurpleText.copy(alpha = 0.2f),
                         shape = CircleShape,
                         modifier = Modifier.size(48.dp)
                     ) {
@@ -176,7 +176,7 @@ private fun HeroSection() {
                             text = "Blind Challenge Mode",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = ErrorRedText
+                            color = PurpleText
                         )
                         Text(
                             text = "Train like FAANG",
@@ -186,7 +186,7 @@ private fun HeroSection() {
                     }
                 }
 
-                Divider(color = ErrorRed.copy(alpha = 0.2f), modifier = Modifier.padding(vertical = 8.dp))
+                Divider(color = PurpleText.copy(alpha = 0.2f), modifier = Modifier.padding(vertical = 8.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),

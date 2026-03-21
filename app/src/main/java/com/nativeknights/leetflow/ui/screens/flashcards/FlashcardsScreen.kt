@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.nativeknights.leetflow.data.models.RecallNote
 import com.nativeknights.leetflow.ui.screens.flashcards.components.NoteCard
+import com.nativeknights.leetflow.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -66,13 +67,13 @@ fun FlashcardsScreen(
                 actions = {
                     if (viewingNote == null && generationState !is GenerationState.Success) {
                         Surface(
-                            color = Color(0xFF111827),
+                            color = BackgroundCard,
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
                             Row(
                                 modifier = Modifier
-                                    .border(1.dp, Color(0xFF374151), RoundedCornerShape(8.dp))
+                                    .border(1.dp, CardBorder, RoundedCornerShape(8.dp))
                                     .padding(4.dp)
                             ) {
                                 TabButton(
@@ -92,13 +93,13 @@ fun FlashcardsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF111827),
-                    titleContentColor = Color(0xFFA78BFA),
-                    navigationIconContentColor = Color.White
+                    containerColor = BackgroundCard,
+                    titleContentColor = WarningYellowText,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         },
-        containerColor = Color(0xFF0F172A)
+        containerColor = BackgroundPrimary
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -159,7 +160,7 @@ private fun TabButton(
 ) {
     Surface(
         onClick = onClick,
-        color = if (isSelected) Color(0xFF7C3AED) else Color.Transparent,
+        color = if (isSelected) WarningYellowText else Color.Transparent,
         shape = RoundedCornerShape(6.dp)
     ) {
         Row(
@@ -170,14 +171,14 @@ private fun TabButton(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (isSelected) Color.White else Color(0xFF9CA3AF),
+                tint = if (isSelected) BackgroundPrimary else TextTertiary,
                 modifier = Modifier.size(16.dp)
             )
             Text(
                 text = text,
                 fontSize = 13.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isSelected) Color.White else Color(0xFF9CA3AF)
+                color = if (isSelected) BackgroundPrimary else TextTertiary
             )
         }
     }
@@ -223,13 +224,13 @@ private fun GeneratorTab(
             placeholder = { Text("e.g., Two Sum") },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFF7C3AED),
-                unfocusedBorderColor = Color(0xFF374151),
-                focusedLabelColor = Color(0xFF7C3AED),
-                unfocusedLabelColor = Color(0xFF9CA3AF),
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                cursorColor = Color(0xFF7C3AED)
+                focusedBorderColor = WarningYellowText,
+                unfocusedBorderColor = CardBorder,
+                focusedLabelColor = WarningYellowText,
+                unfocusedLabelColor = TextTertiary,
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                cursorColor = WarningYellowText
             ),
             shape = RoundedCornerShape(12.dp)
         )
@@ -244,13 +245,13 @@ private fun GeneratorTab(
                 .fillMaxWidth()
                 .height(280.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFF7C3AED),
-                unfocusedBorderColor = Color(0xFF374151),
-                focusedLabelColor = Color(0xFF7C3AED),
-                unfocusedLabelColor = Color(0xFF9CA3AF),
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                cursorColor = Color(0xFF7C3AED)
+                focusedBorderColor = WarningYellowText,
+                unfocusedBorderColor = CardBorder,
+                focusedLabelColor = WarningYellowText,
+                unfocusedLabelColor = TextTertiary,
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                cursorColor = WarningYellowText
             ),
             shape = RoundedCornerShape(12.dp),
             maxLines = Int.MAX_VALUE
@@ -265,27 +266,28 @@ private fun GeneratorTab(
             enabled = problemTitle.isNotBlank() && solutionInput.isNotBlank() && 
                      generationState !is GenerationState.Loading,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF7C3AED),
-                disabledContainerColor = Color(0xFF374151)
+                containerColor = WarningYellowText,
+                disabledContainerColor = CardElevated
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
             if (generationState is GenerationState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
-                    color = Color.White,
+                    color = BackgroundPrimary,
                     strokeWidth = 2.dp
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Text("Generating...", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                Text("Generating...", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = BackgroundPrimary)
             } else {
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
+                    tint = BackgroundPrimary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Generate Flashcard", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                Text("Generate Flashcard", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = BackgroundPrimary)
             }
         }
         

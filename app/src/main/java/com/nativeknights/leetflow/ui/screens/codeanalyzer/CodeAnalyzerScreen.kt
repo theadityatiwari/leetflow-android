@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nativeknights.leetflow.data.models.CodeAnalysis
+import com.nativeknights.leetflow.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,13 +54,13 @@ fun CodeAnalyzerScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF111827),
-                    titleContentColor = Color(0xFF10B981), // secondary green
-                    navigationIconContentColor = Color.White
+                    containerColor = BackgroundCard,
+                    titleContentColor = InfoBlueText,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         },
-        containerColor = Color(0xFF0F172A)
+        containerColor = BackgroundPrimary
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -117,20 +118,20 @@ private fun CodeInputView(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            placeholder = { 
+            placeholder = {
                 Text(
                     text = "Paste your solution code here (Python, C++, Java, JS)...",
-                    color = Color(0xFF6B7280)
+                    color = TextDisabled
                 )
             },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFF111827),
-                unfocusedContainerColor = Color(0xFF111827),
-                focusedBorderColor = Color(0xFF10B981),
-                unfocusedBorderColor = Color(0xFF374151),
-                focusedTextColor = Color(0xFFD1D5DB),
-                unfocusedTextColor = Color(0xFFD1D5DB),
-                cursorColor = Color(0xFF10B981)
+                focusedContainerColor = BackgroundCard,
+                unfocusedContainerColor = BackgroundCard,
+                focusedBorderColor = InfoBlueText,
+                unfocusedBorderColor = CardBorder,
+                focusedTextColor = TextSecondary,
+                unfocusedTextColor = TextSecondary,
+                cursorColor = InfoBlueText
             ),
             shape = RoundedCornerShape(12.dp),
             textStyle = LocalTextStyle.current.copy(
@@ -147,8 +148,8 @@ private fun CodeInputView(
                 .height(54.dp),
             enabled = code.isNotBlank(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF10B981),
-                disabledContainerColor = Color(0xFF10B981).copy(alpha = 0.5f)
+                containerColor = InfoBlueText,
+                disabledContainerColor = InfoBlueText.copy(alpha = 0.5f)
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -173,12 +174,12 @@ private fun LoadingView() {
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.size(48.dp),
-                color = Color(0xFF10B981)
+                color = InfoBlueText
             )
             Text(
                 text = "Analyzing your code...",
                 fontSize = 16.sp,
-                color = Color(0xFF9CA3AF)
+                color = TextTertiary
             )
         }
     }
@@ -227,31 +228,28 @@ private fun AnalysisResultView(
                     else 
                         Icons.Default.Warning,
                     contentDescription = null,
-                    tint = if (analysis.isOptimal) 
-                        Color(0xFF10B981) 
-                    else 
-                        Color(0xFFFBBF24),
+                    tint = if (analysis.isOptimal)
+                        SuccessGreenText
+                    else
+                        WarningYellowText,
                     modifier = Modifier.size(24.dp)
                 )
                 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (analysis.isOptimal) 
-                            "Optimal Solution!" 
-                        else 
+                        text = if (analysis.isOptimal)
+                            "Optimal Solution!"
+                        else
                             "Can be Optimized",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (analysis.isOptimal) 
-                            Color(0xFF10B981) 
-                        else 
-                            Color(0xFFFBBF24)
+                        color = if (analysis.isOptimal) SuccessGreenText else WarningYellowText
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = analysis.feedback,
                         fontSize = 14.sp,
-                        color = Color(0xFFD1D5DB),
+                        color = TextSecondary,
                         lineHeight = 20.sp
                     )
                 }
@@ -284,20 +282,20 @@ private fun AnalysisResultView(
                 text = "DETECTED PATTERN",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF9CA3AF),
+                color = TextTertiary,
                 letterSpacing = 1.sp
             )
-            
+
             Surface(
-                color = Color(0xFF111827),
+                color = BackgroundCard,
                 shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, Color(0xFF374151))
+                border = BorderStroke(1.dp, CardBorder)
             ) {
                 Text(
                     text = analysis.pattern,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     fontSize = 14.sp,
-                    color = Color(0xFF10B981)
+                    color = InfoBlueText
                 )
             }
         }
@@ -309,13 +307,13 @@ private fun AnalysisResultView(
                     text = "OPTIMAL APPROACH",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF9CA3AF),
+                    color = TextTertiary,
                     letterSpacing = 1.sp
                 )
-                
+
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF111827).copy(alpha = 0.5f)
+                        containerColor = BackgroundCard.copy(alpha = 0.5f)
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -323,10 +321,10 @@ private fun AnalysisResultView(
                         text = analysis.optimalApproach,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(1.dp, Color(0xFF374151), RoundedCornerShape(8.dp))
+                            .border(1.dp, CardBorder, RoundedCornerShape(8.dp))
                             .padding(12.dp),
                         fontSize = 14.sp,
-                        color = Color(0xFFD1D5DB),
+                        color = TextSecondary,
                         lineHeight = 20.sp
                     )
                 }
@@ -339,20 +337,20 @@ private fun AnalysisResultView(
                 text = "REFACTORED / CLEANER VERSION",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF9CA3AF),
+                color = TextTertiary,
                 letterSpacing = 1.sp
             )
-            
+
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF111827)
+                    containerColor = BackgroundCard
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, Color(0xFF374151), RoundedCornerShape(8.dp))
+                        .border(1.dp, CardBorder, RoundedCornerShape(8.dp))
                         .horizontalScroll(rememberScrollState())
                 ) {
                     Text(
@@ -360,13 +358,13 @@ private fun AnalysisResultView(
                         modifier = Modifier.padding(16.dp),
                         fontSize = 13.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = Color(0xFFD1D5DB),
+                        color = TextSecondary,
                         lineHeight = 18.sp
                     )
                 }
             }
         }
-        
+
         // Analyze Another Button
         Button(
             onClick = onAnalyzeAnother,
@@ -374,7 +372,7 @@ private fun AnalysisResultView(
                 .fillMaxWidth()
                 .height(54.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF374151)
+                containerColor = CardElevated
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -400,21 +398,21 @@ private fun ComplexityCard(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1F2937)
+            containerColor = CardElevated
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, Color(0xFF374151), RoundedCornerShape(12.dp))
+                .border(1.dp, CardBorder, RoundedCornerShape(12.dp))
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
                 text = label.uppercase(),
                 fontSize = 11.sp,
-                color = Color(0xFF6B7280),
+                color = TextDisabled,
                 letterSpacing = 0.5.sp
             )
             Text(
@@ -444,20 +442,20 @@ private fun ErrorView(
             imageVector = Icons.Default.Warning,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
-            tint = Color(0xFFF87171)
+            tint = ErrorRedText
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = message,
             fontSize = 16.sp,
-            color = Color(0xFFFCA5A5),
+            color = ErrorRedText,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(
             onClick = onRetry,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF3B82F6)
+                containerColor = PrimaryBlue
             )
         ) {
             Text("Try Again")

@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nativeknights.leetflow.data.models.BlitzQuestion
 import com.nativeknights.leetflow.ui.theme.*
+
+private val BlitzCyan = Color(0xFF22D3EE)
+private val BlitzCyanBg = Color(0xFF0C4A6E)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,7 +60,7 @@ fun ComplexityBlitzScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = BackgroundCard,
-                    titleContentColor = WarningYellowText
+                    titleContentColor = BlitzCyan
                 )
             )
         }
@@ -72,14 +76,14 @@ fun ComplexityBlitzScreen(
             // Header
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = WarningYellowBg.copy(alpha = 0.15f)
+                    containerColor = BlitzCyan.copy(alpha = 0.10f)
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, WarningYellowBg.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+                        .border(1.dp, BlitzCyan.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
                         .padding(20.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -90,7 +94,7 @@ fun ComplexityBlitzScreen(
                             text = "Complexity Blitz",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = WarningYellowText
+                            color = BlitzCyan
                         )
                         Text(
                             text = "Test your Big-O knowledge",
@@ -176,12 +180,12 @@ private fun LanguageSelector(
                     colors = FilterChipDefaults.filterChipColors(
                         containerColor = CardElevated,
                         labelColor = TextSecondary,
-                        selectedContainerColor = WarningYellowText.copy(alpha = 0.2f),
-                        selectedLabelColor = WarningYellowText
+                        selectedContainerColor = BlitzCyan.copy(alpha = 0.2f),
+                        selectedLabelColor = BlitzCyan
                     ),
                     border = BorderStroke(
                         1.dp,
-                        if (selectedLanguage == language) WarningYellowText else CardBorder
+                        if (selectedLanguage == language) BlitzCyan else CardBorder
                     )
                 )
             }
@@ -205,12 +209,12 @@ private fun LanguageSelector(
                     colors = FilterChipDefaults.filterChipColors(
                         containerColor = CardElevated,
                         labelColor = TextSecondary,
-                        selectedContainerColor = WarningYellowText.copy(alpha = 0.2f),
-                        selectedLabelColor = WarningYellowText
+                        selectedContainerColor = BlitzCyan.copy(alpha = 0.2f),
+                        selectedLabelColor = BlitzCyan
                     ),
                     border = BorderStroke(
                         1.dp,
-                        if (selectedLanguage == language) WarningYellowText else CardBorder
+                        if (selectedLanguage == language) BlitzCyan else CardBorder
                     )
                 )
             }
@@ -247,7 +251,7 @@ private fun IdleView(
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = WarningYellowText
+                containerColor = BlitzCyan
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -287,7 +291,7 @@ private fun LoadingView() {
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.size(48.dp),
-                color = WarningYellowText
+                color = BlitzCyan
             )
             Text(
                 text = "Generating question...",
