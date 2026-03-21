@@ -27,12 +27,14 @@ Built using **Kotlin, Jetpack Compose, MVVM, and Clean Architecture**.
 
 ## ✨ Features
 
-* 🎯 Smart Problem Selector
-* 🔍 AI Code Analyzer
-* 🧠 Flashcards / Recall Notes
-* 🗺️ Roadmap Planner
-* ⚡ Complexity Blitz
-* 🎲 Blind Mode
+* ⚡ **Decision Fatigue Remover** — AI picks your next LeetCode problem based on your gaps, difficulty preference, and topic. One tap, zero scrolling.
+* 🔍 **Solution Quality Analyzer** — Paste your code and get time/space complexity, detected pattern, feedback, and a cleaner refactored version.
+* 🧠 **AI Flashcards** — Paste your solution and let AI generate a recall card: key intuition, common mistakes, and future-use facts. Saved to a personal library.
+* 🗺️ **Topic Roadmap Planner** — Enter any DSA topic and get a pattern-based roadmap with difficulty levels, key concepts, real-world use cases, and company tags.
+* 💥 **Complexity Blitz** — A timed quiz that tests your ability to identify time and space complexity of code snippets on the fly.
+* 🎲 **Blind 75 Mode** — Work through the classic Blind 75 problem list with guided structure and topic grouping.
+* 📊 **LeetCode Stats** — Fetch your LeetCode profile by username: rank, problems solved by difficulty, submission streak, contest rating, and contest history chart.
+* 👨‍💻 **Developer Profile** — Info about the app creator with social links and tech stack.
 
 ---
 
@@ -40,12 +42,13 @@ Built using **Kotlin, Jetpack Compose, MVVM, and Clean Architecture**.
 
 * Kotlin
 * Jetpack Compose
-* MVVM
-* Clean Architecture
+* MVVM + Clean Architecture
 * Room Database
 * Navigation Compose
 * EncryptedSharedPreferences
-* Gemini API
+* Gemini API (AI features)
+* LeetCode GraphQL API (Stats)
+* In-App Updates (Play Core)
 
 ---
 
@@ -92,12 +95,12 @@ LeetFlow solves this using AI-powered guidance.
 
 ## 🚀 Future Improvements
 
-* LeetCode sync
-* Progress analytics
-* Cloud backup
+* Progress analytics dashboard
+* Cloud backup & sync
 * Leaderboard
 * Study groups
-* Interview mode
+* Interview simulation mode
+* Spaced repetition for flashcards
 
 ---
 

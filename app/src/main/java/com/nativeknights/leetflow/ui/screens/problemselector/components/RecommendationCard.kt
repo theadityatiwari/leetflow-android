@@ -1,6 +1,5 @@
 package com.nativeknights.leetflow.ui.screens.problemselector.components
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -14,127 +13,148 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nativeknights.leetflow.data.models.ProblemRecommendation
+import com.nativeknights.leetflow.ui.theme.*
 
 @Composable
 fun RecommendationCard(
     recommendation: ProblemRecommendation,
     modifier: Modifier = Modifier
 ) {
+    val diffAccent = when (recommendation.difficulty) {
+        "Easy"   -> DifficultyEasyText
+        "Medium" -> DifficultyMediumText
+        "Hard"   -> DifficultyHardText
+        else     -> TextTertiary
+    }
+    val diffBg = when (recommendation.difficulty) {
+        "Easy"   -> DifficultyEasyBg.copy(alpha = 0.15f)
+        "Medium" -> DifficultyMediumBg.copy(alpha = 0.15f)
+        "Hard"   -> DifficultyHardBg.copy(alpha = 0.15f)
+        else     -> CardBorder.copy(alpha = 0.15f)
+    }
+
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1F2937) // gray-800/50
-        )
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = BackgroundCard)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .border(1.dp, CardBorder, RoundedCornerShape(20.dp))
         ) {
-            // Header Row: Difficulty + Topic
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Colored accent bar — difficulty color
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .background(diffAccent)
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Difficulty Badge
-                val (bgColor, textColor) = when (recommendation.difficulty) {
-                    "Easy" -> Color(0xFF10B981).copy(alpha = 0.2f) to Color(0xFF34D399)
-                    "Medium" -> Color(0xFFF59E0B).copy(alpha = 0.2f) to Color(0xFFFBBF24)
-                    "Hard" -> Color(0xFFEF4444).copy(alpha = 0.2f) to Color(0xFFF87171)
-                    else -> Color(0xFF6B7280).copy(alpha = 0.2f) to Color(0xFF9CA3AF)
-                }
-                
-                Surface(
-                    color = bgColor,
-                    shape = RoundedCornerShape(4.dp)
+                // Difficulty badge + topic
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Surface(
+                        color = diffBg,
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            text = recommendation.difficulty,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = diffAccent
+                        )
+                    }
+
                     Text(
-                        text = recommendation.difficulty,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = textColor
+                        text = recommendation.topic.uppercase(),
+                        fontSize = 11.sp,
+                        color = TextTertiary,
+                        letterSpacing = 1.sp
                     )
                 }
-                
-                // Topic Tag
+
+                // Problem title
                 Text(
-                    text = recommendation.topic.uppercase(),
-                    fontSize = 12.sp,
-                    color = Color(0xFF6B7280),
-                    letterSpacing = 1.2.sp
+                    text = recommendation.title,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    lineHeight = 28.sp
+                )
+
+                // Short description
+                Text(
+                    text = recommendation.description,
+                    fontSize = 14.sp,
+                    color = TextSecondary,
+                    lineHeight = 21.sp
+                )
+
+                Divider(color = CardBorder)
+
+                InfoBox(
+                    icon = "🎯",
+                    title = "Why this problem?",
+                    content = recommendation.reason,
+                    accentColor = InfoBlueText
+                )
+
+                InfoBox(
+                    icon = "🧩",
+                    title = "What you'll learn",
+                    content = recommendation.skillBuilder,
+                    accentColor = PurpleText
                 )
             }
-            
-            // Problem Title
-            Text(
-                text = recommendation.title,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            
-            // Description
-            Text(
-                text = recommendation.description,
-                fontSize = 15.sp,
-                color = Color(0xFFD1D5DB),
-                lineHeight = 22.sp
-            )
-            
-            // Reason Box
-            InfoBox(
-                title = "Why this problem?",
-                content = recommendation.reason,
-                backgroundColor = Color(0xFF1E3A8A).copy(alpha = 0.2f),
-                borderColor = Color(0xFF1E3A8A).copy(alpha = 0.5f),
-                titleColor = Color(0xFF60A5FA)
-            )
-            
-            // Skill Builder Box
-            InfoBox(
-                title = "Skill Builder",
-                content = recommendation.skillBuilder,
-                backgroundColor = Color(0xFF581C87).copy(alpha = 0.2f),
-                borderColor = Color(0xFF581C87).copy(alpha = 0.5f),
-                titleColor = Color(0xFFA78BFA)
-            )
         }
     }
 }
 
 @Composable
 private fun InfoBox(
+    icon: String,
     title: String,
     content: String,
-    backgroundColor: Color,
-    borderColor: Color,
-    titleColor: Color,
-    modifier: Modifier = Modifier
+    accentColor: Color
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(backgroundColor, RoundedCornerShape(8.dp))
-            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
-            .padding(16.dp)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = accentColor.copy(alpha = 0.08f),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                text = title,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = titleColor
-            )
-            Text(
-                text = content,
-                fontSize = 13.sp,
-                color = Color(0xFFD1D5DB),
-                lineHeight = 18.sp
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, accentColor.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                .padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(icon, fontSize = 16.sp, modifier = Modifier.padding(top = 1.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = title,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = accentColor
+                )
+                Text(
+                    text = content,
+                    fontSize = 13.sp,
+                    color = TextSecondary,
+                    lineHeight = 19.sp
+                )
+            }
         }
     }
 }
