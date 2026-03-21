@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="280dp"
+    android:minHeight="160dp"
+    android:minResizeWidth="200dp"
+    android:minResizeHeight="120dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="3600000"
+    android:initialLayout="@layout/widget_leetcode_stats"
+    android:widgetCategory="home_screen"
+    android:previewImage="@mipmap/ic_launcher" />
