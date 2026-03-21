@@ -22,42 +22,45 @@
             android:textSize="13sp"
             android:textStyle="bold" />
 
-        <View
+        <!-- spacer — use TextView instead of View (View is not in RemoteViews whitelist) -->
+        <TextView
             android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="" />
 
         <TextView
             android:id="@+id/widget_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@username"
-            android:textColor="#9CA3AF"
-            android:textSize="11sp"
-            android:maxLines="1"
+            android:layout_marginEnd="8dp"
             android:ellipsize="end"
-            android:layout_marginEnd="8dp" />
+            android:maxLines="1"
+            android:text=""
+            android:textColor="#9CA3AF"
+            android:textSize="11sp" />
 
         <TextView
             android:id="@+id/widget_refresh"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="2dp"
             android:text="↻"
             android:textColor="#6EE7B7"
-            android:textSize="18sp"
-            android:padding="2dp" />
+            android:textSize="18sp" />
 
     </LinearLayout>
 
-    <!-- Thin horizontal divider -->
-    <View
+    <!-- Thin horizontal divider — ImageView instead of View -->
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="6dp"
-        android:background="#2D374151" />
+        android:background="#374151"
+        android:contentDescription="" />
 
-    <!-- Stats content area (ring + difficulty breakdown) -->
+    <!-- Stats content area (ring + difficulty breakdown) — shown when data is available -->
     <LinearLayout
         android:id="@+id/widget_content"
         android:layout_width="match_parent"
@@ -73,37 +76,39 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_marginEnd="12dp"
-            android:scaleType="fitCenter"
-            android:contentDescription="Solved problems ring chart" />
+            android:contentDescription=""
+            android:scaleType="fitCenter" />
 
         <!-- Difficulty stats column -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="vertical">
 
             <!-- Easy row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginBottom="5dp"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="4dp">
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
                     android:text="● Easy"
                     android:textColor="#34D399"
-                    android:textSize="11sp"
-                    android:layout_marginEnd="4dp" />
+                    android:textSize="11sp" />
 
-                <View
+                <!-- spacer -->
+                <TextView
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1" />
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="" />
 
                 <TextView
                     android:id="@+id/widget_easy_count"
@@ -120,22 +125,24 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginBottom="5dp"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="4dp">
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
                     android:text="● Medium"
                     android:textColor="#FBBF24"
-                    android:textSize="11sp"
-                    android:layout_marginEnd="4dp" />
+                    android:textSize="11sp" />
 
-                <View
+                <!-- spacer -->
+                <TextView
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1" />
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="" />
 
                 <TextView
                     android:id="@+id/widget_medium_count"
@@ -152,21 +159,23 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
                     android:text="● Hard"
                     android:textColor="#F87171"
-                    android:textSize="11sp"
-                    android:layout_marginEnd="4dp" />
+                    android:textSize="11sp" />
 
-                <View
+                <!-- spacer -->
+                <TextView
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1" />
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="" />
 
                 <TextView
                     android:id="@+id/widget_hard_count"
@@ -183,35 +192,36 @@
 
     </LinearLayout>
 
-    <!-- Empty state overlay (no username / error) -->
+    <!-- Empty / error state — shown when no username or fetch fails -->
     <LinearLayout
         android:id="@+id/widget_empty"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"
         android:gravity="center"
+        android:orientation="vertical"
         android:visibility="gone">
 
         <TextView
             android:id="@+id/widget_empty_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="⚡\nOpen LeetFlow to set your username"
-            android:textColor="#9CA3AF"
-            android:textSize="11sp"
             android:gravity="center"
-            android:lineSpacingExtra="2dp" />
+            android:lineSpacingExtra="2dp"
+            android:text="Open LeetFlow to set your username"
+            android:textColor="#9CA3AF"
+            android:textSize="11sp" />
 
     </LinearLayout>
 
-    <!-- Thin horizontal divider above footer -->
-    <View
+    <!-- Thin horizontal divider above footer — ImageView instead of View -->
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
-        android:background="#2D374151" />
+        android:layout_marginTop="4dp"
+        android:background="#374151"
+        android:contentDescription="" />
 
     <!-- Footer row: streak · active_days | spacer | last updated -->
     <LinearLayout
@@ -243,10 +253,12 @@
             android:textColor="#D1D5DB"
             android:textSize="10sp" />
 
-        <View
+        <!-- spacer -->
+        <TextView
             android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="" />
 
         <TextView
             android:id="@+id/widget_status"
