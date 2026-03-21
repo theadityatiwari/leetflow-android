@@ -140,22 +140,23 @@ class LeetCodeStatsWidget : AppWidgetProvider() {
                 fun totalFor(diff: String) = questionCounts.find { it.difficulty == diff }?.count ?: 0
 
                 val totalSolved = solvedFor("All")
-                val totalProblems = totalFor("All")
                 val easySolved = solvedFor("Easy")
                 val mediumSolved = solvedFor("Medium")
                 val hardSolved = solvedFor("Hard")
+                val easyTotal = totalFor("Easy")
+                val mediumTotal = totalFor("Medium")
+                val hardTotal = totalFor("Hard")
                 val streak = matchedUser.userCalendar?.streak ?: 0
                 val activeDays = matchedUser.userCalendar?.totalActiveDays ?: 0
 
                 // Draw the ring bitmap
                 val density = context.resources.displayMetrics.density
-                val sizePx = (80 * density).toInt().coerceAtLeast(200)
+                val sizePx = (88 * density).toInt().coerceAtLeast(200)
                 val ringBitmap = drawRing(
                     totalSolved = totalSolved,
-                    totalProblems = totalProblems,
-                    easy = easySolved,
-                    medium = mediumSolved,
-                    hard = hardSolved,
+                    easySolved = easySolved, easyTotal = easyTotal,
+                    mediumSolved = mediumSolved, mediumTotal = mediumTotal,
+                    hardSolved = hardSolved, hardTotal = hardTotal,
                     sizePx = sizePx
                 )
 
@@ -197,89 +198,70 @@ class LeetCodeStatsWidget : AppWidgetProvider() {
 
         fun drawRing(
             totalSolved: Int,
-            totalProblems: Int,
-            easy: Int,
-            medium: Int,
-            hard: Int,
+            easySolved: Int, easyTotal: Int,
+            mediumSolved: Int, mediumTotal: Int,
+            hardSolved: Int, hardTotal: Int,
             sizePx: Int
         ): Bitmap {
             val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
 
-            val strokeWidth = sizePx * 0.11f
-            val halfStroke = strokeWidth / 2f
-            val oval = RectF(halfStroke, halfStroke, sizePx - halfStroke, sizePx - halfStroke)
-
             val cx = sizePx / 2f
             val cy = sizePx / 2f
 
-            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            // Match in-app ring: stroke ~7/90 of canvas, gap ~4/90
+            val stroke = sizePx * 0.078f
+            val gap    = sizePx * 0.044f
+
+            // Three concentric radii: outer=Easy, middle=Medium, inner=Hard
+            val outerR  = cx - stroke / 2f
+            val middleR = outerR  - stroke - gap
+            val innerR  = middleR - stroke - gap
+
+            val trackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 style = Paint.Style.STROKE
-                this.strokeWidth = strokeWidth
+                strokeWidth = stroke
+                color = Color.parseColor("#1F2937")  // CardElevated track
+            }
+
+            val arcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+                strokeWidth = stroke
                 strokeCap = Paint.Cap.ROUND
             }
 
-            // Background track arc
-            paint.color = Color.parseColor("#1F2937")
-            canvas.drawArc(oval, 135f, 270f, false, paint)
-
-            // Draw colored arcs only when there are total problems to avoid division by zero
-            if (totalProblems > 0) {
-                val scale = 270f / totalProblems.toFloat()
-
-                var startAngle = 135f
-
-                // Easy arc
-                val easySweep = easy * scale
-                if (easySweep > 0f) {
-                    paint.color = Color.parseColor("#34D399")
-                    canvas.drawArc(oval, startAngle, easySweep, false, paint)
-                    startAngle += easySweep
-                }
-
-                // Medium arc
-                val mediumSweep = medium * scale
-                if (mediumSweep > 0f) {
-                    paint.color = Color.parseColor("#FBBF24")
-                    canvas.drawArc(oval, startAngle, mediumSweep, false, paint)
-                    startAngle += mediumSweep
-                }
-
-                // Hard arc
-                val hardSweep = hard * scale
-                if (hardSweep > 0f) {
-                    paint.color = Color.parseColor("#F87171")
-                    canvas.drawArc(oval, startAngle, hardSweep, false, paint)
+            // Draws one ring: full track circle then a progress arc starting at -90° (12 o'clock)
+            fun drawLevel(radius: Float, solved: Int, total: Int, colorHex: String) {
+                // Track — full circle
+                canvas.drawCircle(cx, cy, radius, trackPaint)
+                // Progress arc
+                val progress = if (total > 0) solved.toFloat() / total else 0f
+                if (progress > 0f) {
+                    arcPaint.color = Color.parseColor(colorHex)
+                    val oval = RectF(cx - radius, cy - radius, cx + radius, cy + radius)
+                    canvas.drawArc(oval, -90f, 360f * progress, false, arcPaint)
                 }
             }
 
-            // Center text — solved count
+            drawLevel(outerR,  easySolved,   easyTotal,   "#34D399")  // green
+            drawLevel(middleR, mediumSolved, mediumTotal, "#FBBF24")  // yellow
+            drawLevel(innerR,  hardSolved,   hardTotal,   "#F87171")  // red
+
+            // Center text — total solved count
             val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 style = Paint.Style.FILL
                 textAlign = Paint.Align.CENTER
             }
 
-            // Solved number
             textPaint.color = Color.WHITE
-            textPaint.textSize = sizePx * 0.22f
+            textPaint.textSize = sizePx * 0.15f
             textPaint.isFakeBoldText = true
-            canvas.drawText(
-                totalSolved.toString(),
-                cx,
-                cy + sizePx * 0.06f,
-                textPaint
-            )
+            canvas.drawText(totalSolved.toString(), cx, cy + sizePx * 0.05f, textPaint)
 
-            // "solved" label
             textPaint.color = Color.parseColor("#6B7280")
-            textPaint.textSize = sizePx * 0.10f
+            textPaint.textSize = sizePx * 0.08f
             textPaint.isFakeBoldText = false
-            canvas.drawText(
-                "solved",
-                cx,
-                cy + sizePx * 0.22f,
-                textPaint
-            )
+            canvas.drawText("solved", cx, cy + sizePx * 0.17f, textPaint)
 
             return bitmap
         }
