@@ -76,6 +76,19 @@ fun DashboardScreen(
                 enabled = state.hasApiKey
             )
 
+            // LeetCode Stats section
+            SectionHeader(title = "PROFILE", accentColor = Color(0xFFFFA116))
+
+            ToolCard(
+                icon = Icons.Default.Star,
+                title = "LeetCode Stats",
+                subtitle = "Rank · Solved · Streak · Contest rating",
+                accentColor = Color(0xFFFFA116),
+                accentBg = Color(0xFF78350F),
+                onClick = { navController.navigate(Screen.LeetCodeStats.route) },
+                enabled = true
+            )
+
             // Training section
             SectionHeader(title = "TRAINING", accentColor = Color(0xFF22D3EE))
 

@@ -13,4 +13,5 @@ sealed class Screen(val route: String) {
     object BlindProblem : Screen("blind_problem")
     object Settings : Screen("settings")
     object Developer : Screen("developer")
+    object LeetCodeStats : Screen("leetcode_stats")
 }
