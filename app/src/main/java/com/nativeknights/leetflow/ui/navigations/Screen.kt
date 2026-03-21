@@ -12,4 +12,5 @@ sealed class Screen(val route: String) {
     object ComplexityBlitz : Screen("complexity_blitz")
     object BlindProblem : Screen("blind_problem")
     object Settings : Screen("settings")
+    object Developer : Screen("developer")
 }

@@ -12,6 +12,7 @@ import com.nativeknights.leetflow.ui.screens.flashcards.FlashcardsScreen
 import com.nativeknights.leetflow.ui.screens.onboarding.OnboardingScreen
 import com.nativeknights.leetflow.ui.screens.problemselector.ProblemSelectorScreen
 import com.nativeknights.leetflow.ui.screens.roadmapplanner.RoadmapPlannerScreen
+import com.nativeknights.leetflow.ui.screens.developer.DeveloperScreen
 import com.nativeknights.leetflow.ui.screens.settings.SettingsScreen
 import com.nativeknights.leetflow.ui.screens.splash.SplashScreen
 
@@ -97,6 +98,13 @@ fun NavigationGraph(
 
         composable(Screen.Settings.route) {
             SettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToDeveloper = { navController.navigate(Screen.Developer.route) }
+            )
+        }
+
+        composable(Screen.Developer.route) {
+            DeveloperScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

@@ -40,6 +40,7 @@ import com.nativeknights.leetflow.ui.theme.*
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToDeveloper: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel()
 ) {
     val updateState by viewModel.updateState.collectAsState()
@@ -484,6 +485,58 @@ fun SettingsScreen(
                             fontWeight = FontWeight.Medium
                         )
                     }
+                }
+            }
+
+            // ── Developer Section ─────────────────────────────────────────────
+            SectionHeader(title = "About", accentColor = PurpleText)
+
+            Card(
+                colors = CardDefaults.cardColors(containerColor = BackgroundCard),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, PurpleBorder.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                        .clickable { onNavigateToDeveloper() }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Surface(
+                            color = PurpleBg.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(text = "👨‍💻", fontSize = 18.sp)
+                            }
+                        }
+                        Column {
+                            Text(
+                                text = "Meet the Developer",
+                                color = TextPrimary,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "Aditya Tiwari · Android Engineer",
+                                color = PurpleText,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                    Icon(
+                        imageVector = Icons.Default.Build,
+                        contentDescription = "Navigate",
+                        tint = PurpleText.copy(alpha = 0.6f),
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
 
