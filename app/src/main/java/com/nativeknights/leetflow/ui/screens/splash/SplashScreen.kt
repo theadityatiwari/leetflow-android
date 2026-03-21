@@ -3,6 +3,7 @@ package com.nativeknights.leetflow.ui.screens.splash
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -16,9 +17,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nativeknights.leetflow.ui.theme.*
 import com.nativeknights.leetflow.R
+import com.nativeknights.leetflow.ui.theme.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SplashScreen(
@@ -26,170 +28,174 @@ fun SplashScreen(
     onNavigateToDashboard: () -> Unit,
     hasApiKey: Boolean
 ) {
-    // Rocket scale animation
-    val infiniteTransition = rememberInfiniteTransition(label = "splash_animation")
-    val rocketScale by infiniteTransition.animateFloat(
-        initialValue = 0.9f,
-        targetValue = 1.1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "rocket_scale"
-    )
+    // One-shot entrance animatables
+    val logoScale = remember { Animatable(0.4f) }
+    val logoAlpha = remember { Animatable(0f) }
+    val titleOffsetY = remember { Animatable(24f) }
+    val titleAlpha = remember { Animatable(0f) }
+    val subtitleAlpha = remember { Animatable(0f) }
+    val dotsAlpha = remember { Animatable(0f) }
 
-    // Fade in animation for content
-    val fadeAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.7f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "fade_alpha"
-    )
-
-    // Subtitle slide animation
-    val slideOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 10f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "slide_offset"
-    )
-
-    // Navigation logic
+    // Staggered entrance sequence
+    val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
-        delay(2500) // Show splash for 2.5 seconds
-        if (hasApiKey) {
-            onNavigateToDashboard()
-        } else {
-            onNavigateToOnboarding()
+        // Logo pops in with spring
+        scope.launch {
+            launch {
+                logoScale.animateTo(
+                    targetValue = 1f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                )
+            }
+            launch {
+                logoAlpha.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing)
+                )
+            }
         }
+
+        // Title slides up after logo settles
+        delay(200)
+        scope.launch {
+            launch {
+                titleOffsetY.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
+                )
+            }
+            launch {
+                titleAlpha.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
+                )
+            }
+        }
+
+        // Subtitle fades in
+        delay(350)
+        subtitleAlpha.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 350, easing = LinearEasing)
+        )
+
+        // Dots fade in last
+        delay(100)
+        dotsAlpha.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 300, easing = LinearEasing)
+        )
+
+        // Navigate after 2 seconds total
+        delay(850)
+        if (hasApiKey) onNavigateToDashboard() else onNavigateToOnboarding()
     }
+
+    // Only the dots pulse — single infinite transition
+    val infiniteTransition = rememberInfiniteTransition(label = "dots")
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        BackgroundPrimary,
-                        BackgroundCard,
-                        BackgroundPrimary
-                    )
-                )
-            ),
+            .background(BackgroundPrimary),
         contentAlignment = Alignment.Center
     ) {
-        // Background decorative elements
+        // Subtle radial glow behind logo
         Box(
             modifier = Modifier
-                .size(300.dp)
-                .alpha(0.05f)
+                .size(280.dp)
+                .alpha(0.14f)
                 .background(
                     brush = Brush.radialGradient(
-                        colors = listOf(
-                            PrimaryBlue,
-                            Color.Transparent
-                        )
+                        colors = listOf(PrimaryBlue, Color.Transparent)
                     )
                 )
         )
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.Center
         ) {
-            // Rocket Emoji with animation
+            // Logo with spring entrance
             Icon(
                 painter = painterResource(id = R.drawable.ic_logo_transparent),
-                contentDescription = "Rocket",
+                contentDescription = "LeetFlow Logo",
                 modifier = Modifier
-                    .scale(rocketScale)
-                    .offset(y = (-slideOffset).dp),
+                    .scale(logoScale.value)
+                    .alpha(logoAlpha.value),
                 tint = Color.Unspecified
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
-            // App Name
+            // App name slides up
             Text(
                 text = "LeetFlow",
-                fontSize = 56.sp,
+                fontSize = 52.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = TextPrimary,
-                modifier = Modifier.alpha(fadeAlpha),
-                letterSpacing = 2.sp
+                letterSpacing = 1.5.sp,
+                modifier = Modifier
+                    .offset(y = titleOffsetY.value.dp)
+                    .alpha(titleAlpha.value)
             )
 
-            // Subtitle
+            // Thin blue accent line
+            Spacer(modifier = Modifier.height(10.dp))
+            Box(
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(2.dp)
+                    .alpha(subtitleAlpha.value)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(Color.Transparent, PrimaryBlue, Color.Transparent)
+                        )
+                    )
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Subtitle fades in
             Text(
                 text = "DSA Command Center",
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextTertiary,
-                letterSpacing = 1.sp
+                letterSpacing = 2.sp,
+                modifier = Modifier.alpha(subtitleAlpha.value)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
-            // Loading indicator dots
+            // Pulsing dots — only infinite animation
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.alpha(dotsAlpha.value)
             ) {
                 repeat(3) { index ->
                     val dotAlpha by infiniteTransition.animateFloat(
-                        initialValue = 0.3f,
+                        initialValue = 0.2f,
                         targetValue = 1f,
                         animationSpec = infiniteRepeatable(
                             animation = tween(
-                                durationMillis = 600,
-                                delayMillis = index * 200,
-                                easing = LinearEasing
+                                durationMillis = 500,
+                                delayMillis = index * 170,
+                                easing = FastOutSlowInEasing
                             ),
                             repeatMode = RepeatMode.Reverse
                         ),
-                        label = "dot_alpha_$index"
+                        label = "dot_$index"
                     )
-
                     Box(
                         modifier = Modifier
-                            .size(8.dp)
+                            .size(7.dp)
                             .alpha(dotAlpha)
-                            .background(
-                                color = PrimaryBlue,
-                                shape = androidx.compose.foundation.shape.CircleShape
-                            )
+                            .background(color = PrimaryBlue, shape = CircleShape)
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            // Bottom tagline
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Powered by",
-                    fontSize = 12.sp,
-                    color = TextDisabled,
-                    fontWeight = FontWeight.Light
-                )
-                Text(
-                    text = "AI",
-                    fontSize = 12.sp,
-                    color = SuccessGreen,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "⚡",
-                    fontSize = 14.sp
-                )
             }
         }
     }

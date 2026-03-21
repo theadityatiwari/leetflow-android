@@ -9,23 +9,27 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.nativeknights.leetflow.R
 import com.nativeknights.leetflow.ui.navigations.Screen
+import com.nativeknights.leetflow.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,70 +39,55 @@ fun DashboardScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    // Entrance animation
+    var contentVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { contentVisible = true }
+    val contentAlpha by animateFloatAsState(
+        targetValue = if (contentVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = 450),
+        label = "content_alpha"
+    )
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = "${state.greeting} 👋",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "Let's crush some problems!",
-                            fontSize = 13.sp,
-                            color = Color.White.copy(alpha = 0.7f)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {
-                        navController.navigate(Screen.Settings.route)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF111827)
-                )
+            DashboardHeader(
+                greeting = state.greeting,
+                notesCount = state.notesCount,
+                hasApiKey = state.hasApiKey,
+                onSettingsClick = { navController.navigate(Screen.Settings.route) }
             )
         },
-        containerColor = Color(0xFF0F172A)
+        containerColor = BackgroundPrimary
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .alpha(contentAlpha)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // 1. HERO SECTION: Decision Fatigue Remover (Kept exactly as it was)
+            // Hero
             HeroCard(
                 onClick = { navController.navigate(Screen.ProblemSelector.route) },
                 enabled = state.hasApiKey
             )
 
-            // 2. NEW ROW: Complexity Blitz & Blind Problem Suggester (Replacing Stats/Curriculum)
+            // Training section
+            SectionHeader(title = "TRAINING", accentColor = Color(0xFF22D3EE))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Complexity Blitz Widget
                 ComplexityBlitzWidget(
                     modifier = Modifier.weight(1f),
                     onClick = { navController.navigate(Screen.ComplexityBlitz.route) },
                     enabled = state.hasApiKey
                 )
-
-                // Blind Problem Suggester Widget
                 BlindProblemWidget(
                     modifier = Modifier.weight(1f),
                     onClick = { navController.navigate(Screen.BlindProblem.route) },
@@ -106,25 +95,15 @@ fun DashboardScreen(
                 )
             }
 
-            // 4. TOOLS GRID
-            Text(
-                text = "Quick Tools",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF9CA3AF),
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            // AI Tools section
+            SectionHeader(title = "AI TOOLS", accentColor = PrimaryBlue)
 
             ToolCard(
                 icon = Icons.Default.LocationOn,
                 title = "Topic Roadmap",
-                subtitle = "All Important Patterns",
-                gradient = Brush.horizontalGradient(
-                    colors = listOf(Color(0xFF831843).copy(alpha = 0.3f), Color(0xFF111827))
-                ),
-                borderColor = Color(0xFF831843).copy(alpha = 0.3f),
-                iconBgColor = Color(0xFF831843).copy(alpha = 0.3f),
-                iconTint = Color(0xFFF9A8D4),
+                subtitle = "Master all important patterns",
+                accentColor = Color(0xFFF9A8D4),
+                accentBg = Color(0xFF831843),
                 onClick = { navController.navigate(Screen.RoadmapPlanner.route) },
                 enabled = state.hasApiKey
             )
@@ -132,13 +111,9 @@ fun DashboardScreen(
             ToolCard(
                 icon = Icons.Default.Create,
                 title = "Code Analyzer",
-                subtitle = "Review Quality",
-                gradient = Brush.horizontalGradient(
-                    colors = listOf(Color(0xFF1E3A8A).copy(alpha = 0.3f), Color(0xFF111827))
-                ),
-                borderColor = Color(0xFF374151),
-                iconBgColor = Color(0xFF1E3A8A).copy(alpha = 0.3f),
-                iconTint = Color(0xFF60A5FA),
+                subtitle = "Review complexity & quality",
+                accentColor = Color(0xFF60A5FA),
+                accentBg = Color(0xFF1E3A8A),
                 onClick = { navController.navigate(Screen.CodeAnalyzer.route) },
                 enabled = state.hasApiKey
             )
@@ -146,114 +121,564 @@ fun DashboardScreen(
             ToolCard(
                 icon = Icons.Default.Star,
                 title = "Recall Notes",
-                subtitle = "${state.notesCount} Cards",
-                gradient = Brush.horizontalGradient(
-                    colors = listOf(Color(0xFF78350F).copy(alpha = 0.3f), Color(0xFF111827))
-                ),
-                borderColor = Color(0xFF374151),
-                iconBgColor = Color(0xFF78350F).copy(alpha = 0.3f),
-                iconTint = Color(0xFFFBBF24),
+                subtitle = if (state.notesCount > 0) "${state.notesCount} flashcards saved" else "Build your flashcard library",
+                accentColor = Color(0xFFFBBF24),
+                accentBg = Color(0xFF78350F),
                 onClick = { navController.navigate(Screen.FlashCard.route) },
                 enabled = true
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
-// ==================== NEW: COMPLEXITY BLITZ WIDGET ====================
+// ─────────────────────────────────────────────────────────
+// HEADER
+// ─────────────────────────────────────────────────────────
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DashboardHeader(
+    greeting: String,
+    notesCount: Int,
+    hasApiKey: Boolean,
+    onSettingsClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(BackgroundCard, BackgroundPrimary)
+                )
+            )
+    ) {
+        TopAppBar(
+            title = {
+                Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                    Text(
+                        text = "$greeting 👋",
+                        fontSize = 12.sp,
+                        color = TextTertiary,
+                        fontWeight = FontWeight.Normal,
+                        letterSpacing = 0.3.sp
+                    )
+                    Text(
+                        text = "Champion",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = TextPrimary,
+                        letterSpacing = (-0.5).sp
+                    )
+                }
+            },
+            actions = {
+                // AI status pill
+                if (hasApiKey) {
+                    AiActiveBadge()
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+                // Notes pill
+                if (notesCount > 0) {
+                    NotesPill(count = notesCount)
+                    Spacer(modifier = Modifier.width(2.dp))
+                }
+                IconButton(onClick = onSettingsClick) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(CardElevated, CircleShape)
+                            .border(1.dp, CardBorder, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = TextSecondary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+        )
+    }
+}
+
+@Composable
+private fun AiActiveBadge() {
+    val infiniteTransition = rememberInfiniteTransition(label = "ai_pulse")
+    val dotAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(900), RepeatMode.Reverse),
+        label = "dot_alpha"
+    )
+    Surface(
+        color = SuccessGreen.copy(alpha = 0.15f),
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.border(1.dp, SuccessGreenText.copy(alpha = 0.25f), RoundedCornerShape(20.dp))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(5.dp)
+                    .alpha(dotAlpha)
+                    .background(SuccessGreenText, CircleShape)
+            )
+            Text("AI", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SuccessGreenText)
+        }
+    }
+}
+
+@Composable
+private fun NotesPill(count: Int) {
+    Surface(
+        color = CardElevated,
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.border(1.dp, CardBorder, RoundedCornerShape(20.dp))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text("📝", fontSize = 11.sp)
+            Text(
+                "$count",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextSecondary
+            )
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────
+// SECTION HEADER
+// ─────────────────────────────────────────────────────────
+
+@Composable
+fun SectionHeader(title: String, accentColor: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(top = 2.dp, start = 2.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(18.dp)
+                .height(2.dp)
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(accentColor, Color.Transparent)
+                    ),
+                    shape = RoundedCornerShape(1.dp)
+                )
+        )
+        Text(
+            text = title,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = accentColor.copy(alpha = 0.75f),
+            letterSpacing = 1.8.sp
+        )
+    }
+}
+
+// ─────────────────────────────────────────────────────────
+// HERO CARD
+// ─────────────────────────────────────────────────────────
+
+@Composable
+private fun HeroCard(onClick: () -> Unit, enabled: Boolean) {
+    val infiniteTransition = rememberInfiniteTransition(label = "hero")
+    val arrowOffset by infiniteTransition.animateFloat(
+        initialValue = 0f, targetValue = 5f,
+        animationSpec = infiniteRepeatable(tween(700, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "arrow"
+    )
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.08f, targetValue = 0.16f,
+        animationSpec = infiniteRepeatable(tween(1800), RepeatMode.Reverse),
+        label = "glow"
+    )
+
+    Card(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(215.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        shape = RoundedCornerShape(24.dp),
+        enabled = enabled
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF1E3A8A).copy(alpha = if (enabled) 1f else 0.4f),
+                            Color(0xFF1E40AF).copy(alpha = if (enabled) 0.6f else 0.2f),
+                            BackgroundCard
+                        )
+                    )
+                )
+                .border(
+                    width = 1.dp,
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            PrimaryBlue.copy(alpha = if (enabled) 0.5f else 0.15f),
+                            CardBorder.copy(alpha = 0.2f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(24.dp)
+                )
+        ) {
+            // Animated glow orb
+            Box(
+                modifier = Modifier
+                    .size(180.dp)
+                    .align(Alignment.TopEnd)
+                    .offset(x = 50.dp, y = (-50).dp)
+                    .background(PrimaryBlue.copy(alpha = glowAlpha), CircleShape)
+            )
+            Box(
+                modifier = Modifier
+                    .size(90.dp)
+                    .align(Alignment.BottomStart)
+                    .offset(x = (-25).dp, y = 25.dp)
+                    .background(PrimaryBlue.copy(alpha = 0.07f), CircleShape)
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(22.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    // AI badge
+                    Surface(
+                        color = SuccessGreen.copy(alpha = 0.18f),
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier.border(
+                            1.dp,
+                            SuccessGreenText.copy(alpha = 0.3f),
+                            RoundedCornerShape(20.dp)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(5.dp)
+                                    .background(SuccessGreenText, CircleShape)
+                            )
+                            Text(
+                                "AI POWERED",
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = SuccessGreenText,
+                                letterSpacing = 0.8.sp
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = "Decision Fatigue\nRemover",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if (enabled) TextPrimary else TextPrimary.copy(alpha = 0.4f),
+                        lineHeight = 28.sp,
+                        letterSpacing = (-0.3).sp
+                    )
+                    Text(
+                        text = "Don't know what to solve? Let AI pick the right problem based on your gaps.",
+                        fontSize = 13.sp,
+                        color = if (enabled) TextSecondary else TextSecondary.copy(alpha = 0.4f),
+                        lineHeight = 19.sp
+                    )
+                }
+
+                if (enabled) {
+                    Surface(
+                        color = PrimaryBlue,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(14.dp))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                "Get Recommendation",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary,
+                                textAlign = TextAlign.Center
+                            )
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForward,
+                                null,
+                                tint = TextPrimary,
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .offset(x = arrowOffset.dp)
+                            )
+                        }
+                    }
+                }
+                else {
+                    Surface(
+                        color = ErrorRedBg.copy(alpha = 0.35f),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.border(1.dp, ErrorRed.copy(alpha = 0.25f), RoundedCornerShape(10.dp))
+                    ) {
+                        Text(
+                            "⚠️  API Key Required",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = ErrorRedText
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────
+// TRAINING WIDGETS
+// ─────────────────────────────────────────────────────────
+
 @Composable
 private fun ComplexityBlitzWidget(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     enabled: Boolean
 ) {
+    val cyanColor = Color(0xFF22D3EE)
+    val alpha = if (enabled) 1f else 0.4f
+
     Card(
         onClick = onClick,
-        modifier = modifier.height(120.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF111827)),
-        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.height(165.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        shape = RoundedCornerShape(20.dp),
         enabled = enabled
     ) {
-        Box(modifier = Modifier.fillMaxSize().border(1.dp, Color(0xFF0891B2).copy(alpha = 0.4f), RoundedCornerShape(16.dp)).padding(16.dp)) {
-            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                    Text(text = "TRAINING", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF22D3EE), letterSpacing = 1.sp)
-                    Text(text = "Complexity", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF0C4A6E).copy(alpha = alpha * 0.85f),
+                            BackgroundCard
+                        )
+                    )
+                )
+                .border(
+                    1.dp,
+                    Color(0xFF0891B2).copy(alpha = alpha * 0.35f),
+                    RoundedCornerShape(20.dp)
+                )
+                .padding(16.dp)
+        ) {
+            // Decorative background icon
+            Icon(
+                imageVector = Icons.Default.DateRange,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(70.dp)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 18.dp, y = 18.dp),
+                tint = cyanColor.copy(alpha = 0.09f)
+            )
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(5.dp)
+                                .background(cyanColor.copy(alpha = alpha), CircleShape)
+                        )
+                        Text(
+                            "TRAINING",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = cyanColor.copy(alpha = alpha),
+                            letterSpacing = 1.2.sp
+                        )
+                    }
+                    Text(
+                        "Complexity\nBlitz",
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = TextPrimary.copy(alpha = alpha),
+                        lineHeight = 23.sp,
+                        letterSpacing = (-0.3).sp
+                    )
                 }
-                Text(text = "Blitz Big O", fontSize = 12.sp, color = Color(0xFF10B981))
+
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Surface(
+                        color = cyanColor.copy(alpha = 0.12f),
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            "Big O Quiz",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = cyanColor.copy(alpha = alpha)
+                        )
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Text(
+                            "Tap to start",
+                            fontSize = 10.sp,
+                            color = TextDisabled.copy(alpha = alpha)
+                        )
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForward,
+                            null,
+                            modifier = Modifier.size(10.dp),
+                            tint = TextDisabled.copy(alpha = alpha)
+                        )
+                    }
+                }
             }
-            Icon(imageVector = Icons.Default.DateRange, contentDescription = null, modifier = Modifier.size(48.dp).align(Alignment.TopEnd).offset(x = 10.dp, y = (-10).dp), tint = Color(0xFF22D3EE).copy(alpha = 0.2f))
         }
     }
 }
 
-// ==================== NEW: BLIND PROBLEM WIDGET ====================
 @Composable
 private fun BlindProblemWidget(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     enabled: Boolean
 ) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.height(120.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF111827)),
-        shape = RoundedCornerShape(16.dp),
-        enabled = enabled
-    ) {
-        Box(modifier = Modifier.fillMaxSize().border(1.dp, Color(0xFF7C3AED).copy(alpha = 0.4f), RoundedCornerShape(16.dp)).padding(16.dp)) {
-            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                    Text(text = "CHALLENGE", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFA78BFA), letterSpacing = 1.sp)
-                    Text(text = "Blind", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                }
-                Text(text = "No Hints mode", fontSize = 12.sp, color = Color(0xFFA78BFA))
-            }
-            Icon(painterResource(
-                id = R.drawable.ic_visibility_off_v2
-            ), contentDescription = null, modifier = Modifier.size(48.dp).align(Alignment.TopEnd).offset(x = 10.dp, y = (-10).dp), tint = Color(0xFFA78BFA).copy(alpha = 0.2f))
-        }
-    }
-}
+    val purpleColor = Color(0xFFA78BFA)
+    val alpha = if (enabled) 1f else 0.4f
 
-// ==================== HERO CARD (ORIGINAL) ====================
-@Composable
-private fun HeroCard(
-    onClick: () -> Unit,
-    enabled: Boolean
-) {
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth().height(160.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF111827),
-            disabledContainerColor = Color(0xFF111827).copy(alpha = 0.5f)
-        ),
+        modifier = modifier.height(165.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         shape = RoundedCornerShape(20.dp),
         enabled = enabled
     ) {
-        Box(modifier = Modifier.fillMaxSize().border(1.dp, Color(0xFF374151), RoundedCornerShape(20.dp)).padding(20.dp)) {
-            Text(text = "⚡", fontSize = 80.sp, modifier = Modifier.align(Alignment.TopEnd).offset(x = 10.dp, y = (-10).dp), color = Color.White.copy(alpha = if (enabled) 0.1f else 0.05f))
-            Column(modifier = Modifier.fillMaxSize().padding(end = 60.dp), verticalArrangement = Arrangement.SpaceBetween) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Surface(color = Color(0xFF3B82F6).copy(alpha = 0.2f), shape = CircleShape, modifier = Modifier.size(32.dp)) {
-                            Box(contentAlignment = Alignment.Center) { Text(text = "⚡", fontSize = 18.sp) }
-                        }
-                        Text(text = "Decision Fatigue Remover", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = if (enabled) Color.White else Color.White.copy(alpha = 0.5f))
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF2E1065).copy(alpha = alpha * 0.85f),
+                            BackgroundCard
+                        )
+                    )
+                )
+                .border(
+                    1.dp,
+                    Color(0xFF7C3AED).copy(alpha = alpha * 0.35f),
+                    RoundedCornerShape(20.dp)
+                )
+                .padding(16.dp)
+        ) {
+            // Decorative background icon
+            Icon(
+                painter = painterResource(id = R.drawable.ic_visibility_off_v2),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(70.dp)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 18.dp, y = 18.dp),
+                tint = purpleColor.copy(alpha = 0.09f)
+            )
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(5.dp)
+                                .background(purpleColor.copy(alpha = alpha), CircleShape)
+                        )
+                        Text(
+                            "CHALLENGE",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = purpleColor.copy(alpha = alpha),
+                            letterSpacing = 1.2.sp
+                        )
                     }
-                    Text(text = "Don't know what to solve? Let AI decide based on your gaps.", fontSize = 13.sp, color = if (enabled) Color(0xFF9CA3AF) else Color(0xFF9CA3AF).copy(alpha = 0.5f), lineHeight = 18.sp)
+                    Text(
+                        "Blind\nProblem",
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = TextPrimary.copy(alpha = alpha),
+                        lineHeight = 23.sp,
+                        letterSpacing = (-0.3).sp
+                    )
                 }
-                if (enabled) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(text = "Get Recommendation", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF3B82F6))
-                        Icon(imageVector = Icons.Default.ArrowForward, contentDescription = null, tint = Color(0xFF3B82F6), modifier = Modifier.size(16.dp))
+
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Surface(
+                        color = purpleColor.copy(alpha = 0.12f),
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            "No Hints Mode",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = purpleColor.copy(alpha = alpha)
+                        )
                     }
-                } else {
-                    Surface(color = Color(0xFF7F1D1D).copy(alpha = 0.3f), shape = RoundedCornerShape(6.dp)) {
-                        Text(text = "API Key Required", modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp), fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color(0xFFFCA5A5))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Text(
+                            "Tap to start",
+                            fontSize = 10.sp,
+                            color = TextDisabled.copy(alpha = alpha)
+                        )
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForward,
+                            null,
+                            modifier = Modifier.size(10.dp),
+                            tint = TextDisabled.copy(alpha = alpha)
+                        )
                     }
                 }
             }
@@ -261,59 +686,115 @@ private fun HeroCard(
     }
 }
 
-// ==================== AI COACH CARD ====================
-@Composable
-private fun AICoachCard(enabled: Boolean) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF111827)),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Box(modifier = Modifier.fillMaxWidth().border(1.dp, Color(0xFF374151), RoundedCornerShape(16.dp)).padding(20.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Surface(color = Color(0xFF1E3A8A).copy(alpha = 0.3f), shape = CircleShape, modifier = Modifier.size(48.dp)) {
-                    Box(contentAlignment = Alignment.Center) { Text(text = "🤖", fontSize = 24.sp) }
-                }
-                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(text = "AI Progress Coach", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    Text(text = if (enabled) "Get personalized insights and recommendations" else "Enable API key to unlock AI insights", fontSize = 12.sp, color = Color(0xFF9CA3AF), lineHeight = 16.sp)
-                }
-                if (enabled) AnimatedStatusDot()
-            }
-        }
-    }
-}
+// ─────────────────────────────────────────────────────────
+// TOOL CARD
+// ─────────────────────────────────────────────────────────
 
-@Composable
-private fun AnimatedStatusDot() {
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val scale by infiniteTransition.animateFloat(initialValue = 1f, targetValue = 1.3f, animationSpec = infiniteRepeatable(animation = tween(1000, easing = FastOutSlowInEasing), repeatMode = RepeatMode.Reverse), label = "scale")
-    Box(modifier = Modifier.size(12.dp).background(Color(0xFF10B981), CircleShape).then(Modifier.size((12 * scale).dp).background(Color(0xFF10B981).copy(alpha = 0.3f), CircleShape)))
-}
-
-// ==================== TOOL CARD ====================
 @Composable
 private fun ToolCard(
-    icon: ImageVector, title: String, subtitle: String, gradient: Brush, borderColor: Color,
-    iconBgColor: Color, iconTint: Color, onClick: () -> Unit, enabled: Boolean
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    accentColor: Color,
+    accentBg: Color,
+    onClick: () -> Unit,
+    enabled: Boolean
 ) {
+    val enabledAlpha = if (enabled) 1f else 0.4f
+
     Card(
-        onClick = onClick, modifier = Modifier.fillMaxWidth().height(80.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent, disabledContainerColor = Color.Transparent),
-        shape = RoundedCornerShape(16.dp), enabled = enabled
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        shape = RoundedCornerShape(18.dp),
+        enabled = enabled
     ) {
-        Box(modifier = Modifier.fillMaxSize().background(gradient).border(width = 1.dp, color = if (enabled) borderColor else borderColor.copy(alpha = 0.3f), shape = RoundedCornerShape(16.dp)).padding(16.dp)) {
-            Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Surface(color = if (enabled) iconBgColor else iconBgColor.copy(alpha = 0.3f), shape = RoundedCornerShape(10.dp), modifier = Modifier.size(44.dp)) {
-                        Box(contentAlignment = Alignment.Center) { Icon(imageVector = icon, contentDescription = null, tint = if (enabled) iconTint else iconTint.copy(alpha = 0.5f), modifier = Modifier.size(22.dp)) }
-                    }
-                    Column {
-                        Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = if (enabled) Color.White else Color.White.copy(alpha = 0.5f))
-                        Text(text = subtitle, fontSize = 12.sp, color = if (enabled) Color(0xFF9CA3AF) else Color(0xFF9CA3AF).copy(alpha = 0.5f))
-                    }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            accentBg.copy(alpha = enabledAlpha * 0.28f),
+                            BackgroundCard
+                        )
+                    ),
+                    shape = RoundedCornerShape(18.dp)
+                )
+                .border(
+                    1.dp,
+                    accentColor.copy(alpha = enabledAlpha * 0.18f),
+                    RoundedCornerShape(18.dp)
+                )
+                .padding(horizontal = 16.dp, vertical = 14.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Icon box
+                Box(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .background(
+                            accentBg.copy(alpha = enabledAlpha * 0.5f),
+                            RoundedCornerShape(14.dp)
+                        )
+                        .border(
+                            1.dp,
+                            accentColor.copy(alpha = enabledAlpha * 0.2f),
+                            RoundedCornerShape(14.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = accentColor.copy(alpha = enabledAlpha),
+                        modifier = Modifier.size(22.dp)
+                    )
                 }
-                Icon(imageVector = Icons.Default.ArrowForward, contentDescription = null, tint = if (enabled) Color(0xFF4B5563) else Color(0xFF4B5563).copy(alpha = 0.3f), modifier = Modifier.size(18.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    Text(
+                        text = title,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary.copy(alpha = enabledAlpha)
+                    )
+                    Text(
+                        text = subtitle,
+                        fontSize = 12.sp,
+                        color = TextTertiary.copy(alpha = enabledAlpha)
+                    )
+                }
+
+                // Arrow circle
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .background(
+                            accentBg.copy(alpha = enabledAlpha * 0.35f),
+                            CircleShape
+                        )
+                        .border(
+                            1.dp,
+                            accentColor.copy(alpha = enabledAlpha * 0.25f),
+                            CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForward,
+                        null,
+                        tint = accentColor.copy(alpha = enabledAlpha),
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
             }
         }
     }

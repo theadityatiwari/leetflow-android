@@ -6,6 +6,7 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +20,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -30,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nativeknights.leetflow.R
+import com.nativeknights.leetflow.ui.screens.dashboard.SectionHeader
 import com.nativeknights.leetflow.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,7 +47,9 @@ fun SettingsScreen(
     val currentApiKey by viewModel.currentApiKey.collectAsState()
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
-    
+    val privacyPolicyUrl =
+        "https://continuous-marquis-bbf.notion.site/Privacy-Policy-for-LeetFlow-3266854374568005bdd9e70d97039ef0"
+
     var isKeyVisible by remember { mutableStateOf(false) }
 
     // Navigate back on success after delay
@@ -92,11 +98,9 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
 
-            // Current API Key Section
+            // ── Current API Key Section ──────────────────────────────────────
             Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = BackgroundCard
-                ),
+                colors = CardDefaults.cardColors(containerColor = BackgroundCard),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
@@ -124,7 +128,7 @@ fun SettingsScreen(
                                 )
                             }
                         }
-                        
+
                         Column {
                             Text(
                                 text = "Current API Key",
@@ -140,9 +144,9 @@ fun SettingsScreen(
                             )
                         }
                     }
-                    
+
                     Divider(color = CardBorder)
-                    
+
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -163,11 +167,9 @@ fun SettingsScreen(
                 }
             }
 
-            // Update API Key Section
+            // ── Update API Key Section ───────────────────────────────────────
             Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = BackgroundCard
-                ),
+                colors = CardDefaults.cardColors(containerColor = BackgroundCard),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
@@ -184,7 +186,6 @@ fun SettingsScreen(
                         color = TextPrimary
                     )
 
-                    // API Key Input
                     OutlinedTextField(
                         value = apiKeyInput,
                         onValueChange = viewModel::onApiKeyChange,
@@ -192,9 +193,9 @@ fun SettingsScreen(
                         placeholder = { Text("AIza...") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        visualTransformation = if (isKeyVisible) 
-                            VisualTransformation.None 
-                        else 
+                        visualTransformation = if (isKeyVisible)
+                            VisualTransformation.None
+                        else
                             PasswordVisualTransformation(),
                         trailingIcon = {
                             IconButton(onClick = { isKeyVisible = !isKeyVisible }) {
@@ -248,12 +249,10 @@ fun SettingsScreen(
                         }
                     )
 
-                    // Action Buttons
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Validate & Update Button
                         Button(
                             onClick = { viewModel.validateAndUpdateApiKey() },
                             modifier = Modifier
@@ -287,8 +286,7 @@ fun SettingsScreen(
                                 }
                             }
                         }
-                        
-                        // Cancel Button
+
                         OutlinedButton(
                             onClick = { viewModel.resetUpdateState() },
                             modifier = Modifier.height(54.dp),
@@ -305,7 +303,7 @@ fun SettingsScreen(
                 }
             }
 
-            // Success Message
+            // ── Success Message ──────────────────────────────────────────────
             AnimatedVisibility(
                 visible = updateState is ApiKeyUpdateState.Success,
                 enter = fadeIn() + expandVertically(),
@@ -333,7 +331,7 @@ fun SettingsScreen(
                         )
                         Column {
                             Text(
-                                text = (updateState as? ApiKeyUpdateState.Success)?.message 
+                                text = (updateState as? ApiKeyUpdateState.Success)?.message
                                     ?: "Success!",
                                 color = SuccessGreenText,
                                 fontWeight = FontWeight.Bold,
@@ -349,7 +347,7 @@ fun SettingsScreen(
                 }
             }
 
-            // Help Section
+            // ── Help Section ─────────────────────────────────────────────────
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = InfoBlueBg.copy(alpha = 0.1f)
@@ -380,29 +378,173 @@ fun SettingsScreen(
                             color = InfoBlueText
                         )
                     }
-                    
+
                     Text(
                         text = "Your API key is stored securely and encrypted. If validation fails, your old key will remain active.",
                         fontSize = 13.sp,
                         color = TextTertiary,
                         lineHeight = 18.sp
                     )
-                    
+
                     TextButton(
                         onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://aistudio.google.com/app/apikey"))
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://aistudio.google.com/app/apikey")
+                            )
                             context.startActivity(intent)
                         },
                         colors = ButtonDefaults.textButtonColors(
                             contentColor = InfoBlueText
                         )
                     ) {
-                        Text("Get a new API key →", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        Text(
+                            "Get a new API key →",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+
+            // ── Legal Section ────────────────────────────────────────────────
+            // Section label
+            SectionHeader(title = "Legal", accentColor = InfoBlueText)
+
+            Card(
+                colors = CardDefaults.cardColors(containerColor = BackgroundCard),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
+                ) {
+
+                    // Privacy Policy Row
+                    LegalLinkRow(
+                        icon = Icons.Default.Info,
+                        title = "Privacy Policy",
+                        subtitle = "How LeetFlow handles your data",
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(privacyPolicyUrl))
+                            context.startActivity(intent)
+                        }
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = CardBorder
+                    )
+
+                    // App Version Row
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Surface(
+                                color = PrimaryBlue.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.Info,
+                                        contentDescription = null,
+                                        tint = PrimaryBlue,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                            Column {
+                                Text(
+                                    text = "App Version",
+                                    color = TextPrimary,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = "LeetFlow - DSA Command Center",
+                                    color = Color(0xFF9CA3AF),
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                        Text(
+                            text = "1.0.0",
+                            color = Color(0xFF6B7280),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+}
+
+// ── Reusable Legal Link Row ──────────────────────────────────────────────────
+@Composable
+private fun LegalLinkRow(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Surface(
+                color = PrimaryBlue.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.size(36.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = PrimaryBlue,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+            Column {
+                Text(
+                    text = title,
+                    color = TextPrimary,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = subtitle,
+                    color = Color(0xFF9CA3AF),
+                    fontSize = 12.sp
+                )
+            }
+        }
+        Icon(
+            imageVector = Icons.Default.Build,
+            contentDescription = "Opens in browser",
+            tint = Color(0xFF6B7280),
+            modifier = Modifier.size(16.dp)
+        )
     }
 }
