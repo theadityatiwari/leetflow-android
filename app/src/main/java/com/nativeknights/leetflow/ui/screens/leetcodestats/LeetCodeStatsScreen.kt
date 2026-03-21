@@ -1070,10 +1070,10 @@ private fun HeatCell(count: Int?, isVisible: Boolean) {
     val color = when {
         !isVisible || count == null -> Color.Transparent
         count == 0 -> CardElevated
-        count == 1 -> LeetcodeOrange.copy(alpha = 0.22f)
-        count <= 3 -> LeetcodeOrange.copy(alpha = 0.44f)
-        count <= 6 -> LeetcodeOrange.copy(alpha = 0.68f)
-        else -> LeetcodeOrange
+        count == 1 -> SuccessGreenText.copy(alpha = 0.22f)
+        count <= 3 -> SuccessGreenText.copy(alpha = 0.44f)
+        count <= 6 -> SuccessGreenText.copy(alpha = 0.68f)
+        else -> SuccessGreenText
     }
     Box(
         modifier = Modifier
@@ -1096,10 +1096,10 @@ private fun HeatmapLegend() {
         Spacer(Modifier.width(4.dp))
         listOf(
             CardElevated,
-            LeetcodeOrange.copy(alpha = 0.22f),
-            LeetcodeOrange.copy(alpha = 0.44f),
-            LeetcodeOrange.copy(alpha = 0.68f),
-            LeetcodeOrange
+            SuccessGreenText.copy(alpha = 0.22f),
+            SuccessGreenText.copy(alpha = 0.44f),
+            SuccessGreenText.copy(alpha = 0.68f),
+            SuccessGreenText
         ).forEach { bg ->
             Box(
                 modifier = Modifier
