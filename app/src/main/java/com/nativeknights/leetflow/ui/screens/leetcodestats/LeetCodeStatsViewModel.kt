@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.nativeknights.leetflow.data.local.AppPreferences
 import com.nativeknights.leetflow.data.models.GraphQLRequest
 import com.nativeknights.leetflow.data.remote.LeetCodeClient
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 class LeetCodeStatsViewModel(app: Application) : AndroidViewModel(app) {
 
     private val prefs = app.getSharedPreferences("leetflow_lc_prefs", Context.MODE_PRIVATE)
+    private val appPreferences = AppPreferences(app)
 
     private val _uiState = MutableStateFlow<LeetCodeStatsUiState>(LeetCodeStatsUiState.Idle)
     val uiState: StateFlow<LeetCodeStatsUiState> = _uiState
@@ -71,6 +73,11 @@ class LeetCodeStatsViewModel(app: Application) : AndroidViewModel(app) {
 
                 val calMap = parseCalendar(matchedUser.userCalendar?.submissionCalendar ?: "{}")
 
+                // Cache key stats for the Dashboard snapshot card
+                appPreferences.lastKnownStreak = matchedUser.userCalendar?.streak ?: 0
+                appPreferences.lastKnownSolved = solvedFor("All")
+                appPreferences.lastKnownUsername = user
+
                 _uiState.value = LeetCodeStatsUiState.Success(
                     LeetCodeStats(
                         username = user,
@@ -91,7 +98,8 @@ class LeetCodeStatsViewModel(app: Application) : AndroidViewModel(app) {
                         contestGlobalRank = ranking?.globalRanking,
                         attendedContests = ranking?.attendedContestsCount,
                         topPercentage = ranking?.topPercentage,
-                        contestHistory = history
+                        contestHistory = history,
+                        badges = matchedUser.badges ?: emptyList()
                     )
                 )
             } catch (e: Exception) {
@@ -118,6 +126,7 @@ class LeetCodeStatsViewModel(app: Application) : AndroidViewModel(app) {
                   acSubmissionNum { difficulty count submissions }
                 }
                 userCalendar { streak totalActiveDays submissionCalendar }
+                badges { id displayName icon creationDate }
               }
             }
         """.trimIndent()

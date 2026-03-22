@@ -488,6 +488,60 @@ fun SettingsScreen(
                 }
             }
 
+            // ── Community Section ─────────────────────────────────────────────
+            SectionHeader(title = "Community", accentColor = SuccessGreenText)
+
+            Card(
+                colors = CardDefaults.cardColors(containerColor = BackgroundCard),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
+                ) {
+                    LegalLinkRow(
+                        icon = Icons.Default.Share,
+                        title = "Share LeetFlow",
+                        subtitle = "Help friends discover their DSA sidekick",
+                        onClick = {
+                            val shareText = "🚀 Supercharge your DSA prep with LeetFlow!\n\n" +
+                                "✨ AI picks your next problem — no more decision fatigue\n" +
+                                "🔍 Instant code complexity & quality analysis\n" +
+                                "🧠 AI-generated flashcards for recall\n" +
+                                "🗺️ Topic roadmaps with company tags\n" +
+                                "💥 Complexity Blitz — timed Big-O quiz mode\n" +
+                                "📊 LeetCode stats, streaks & contest history\n\n" +
+                                "Free on Google Play 👇\n" +
+                                "https://play.google.com/store/apps/details?id=com.nativeknights.leetflow"
+                            val intent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                            }
+                            context.startActivity(Intent.createChooser(intent, "Share LeetFlow"))
+                        }
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = CardBorder
+                    )
+
+                    LegalLinkRow(
+                        icon = Icons.Default.Star,
+                        title = "Rate LeetFlow",
+                        subtitle = "Love the app? Leave us a review ⭐",
+                        onClick = {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://play.google.com/store/apps/details?id=com.nativeknights.leetflow")
+                            )
+                            context.startActivity(intent)
+                        }
+                    )
+                }
+            }
+
             // ── Developer Section ─────────────────────────────────────────────
             SectionHeader(title = "About", accentColor = PurpleText)
 

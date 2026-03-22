@@ -14,10 +14,15 @@ android {
         applicationId = "com.nativeknights.leetflow"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.2"
+        versionCode = 4        // always +1 from last release, Play Store rejects same/lower
+        versionName = "1.3"   // user-facing label shown on Play Store
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    lint {
+        // False positive — app uses ComponentActivity (pure Compose), not fragments
+        disable += "InvalidFragmentVersionForActivityResult"
     }
 
     buildTypes {
@@ -85,6 +90,12 @@ dependencies {
 
     // In-App Updates
     implementation(libs.play.app.update.ktx)
+
+    // In-App Review
+    implementation(libs.play.review.ktx)
+
+    // Image Loading (badge icons)
+    implementation(libs.coil.compose)
 
     // Testing
     testImplementation(libs.junit)

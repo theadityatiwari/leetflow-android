@@ -16,10 +16,18 @@ data class StatsData(
 
 data class QuestionCount(val difficulty: String, val count: Int)
 
+data class UserBadge(
+    val id: String?,
+    val displayName: String?,
+    val icon: String?,          // relative path e.g. "/static/images/badges/..."
+    val creationDate: String?   // "YYYY-MM-DD"
+)
+
 data class MatchedUser(
     val profile: UserProfile?,
     val submitStats: SubmitStats?,
-    val userCalendar: UserCalendar?
+    val userCalendar: UserCalendar?,
+    val badges: List<UserBadge>?
 )
 
 data class UserProfile(val ranking: Int?)

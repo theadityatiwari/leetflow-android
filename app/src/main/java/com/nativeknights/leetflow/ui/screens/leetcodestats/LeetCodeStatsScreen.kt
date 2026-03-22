@@ -38,7 +38,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.nativeknights.leetflow.data.models.ContestHistory
+import com.nativeknights.leetflow.data.models.UserBadge
 import com.nativeknights.leetflow.ui.theme.*
 import kotlin.math.roundToInt
 
@@ -296,6 +298,11 @@ private fun StatsContent(stats: LeetCodeStats) {
     // ── Contest ───────────────────────────────────────────────────────────
     if ((stats.contestRating ?: 0.0) > 0.0) {
         ContestCard(stats)
+    }
+
+    // ── Badges ────────────────────────────────────────────────────────────
+    if (stats.badges.isNotEmpty()) {
+        BadgesCard(stats.badges)
     }
 }
 
@@ -803,12 +810,18 @@ private val MONTH_SHORT = listOf("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"
 
 private data class HeatDay(val month: Int, val dayOfMonth: Int, val count: Int)
 
-/** Each column = one week (7 rows Sun→Sat). Null = padding outside the year. */
-private data class HeatWeek(val days: List<HeatDay?>, val monthLabel: String?)
+/** One month's worth of week-columns (each inner list = 7 cells Sun→Sat, null = padding). */
+private data class HeatMonth(val monthIdx: Int, val weeks: List<List<HeatDay?>>)
 
-private fun buildHeatWeeks(year: Int, calendar: Map<Long, Int>): List<HeatWeek> {
-    // Build day-level lookup: "M/D" -> count (UTC dates)
+/**
+ * Builds 12 independent month grids for [year].
+ * Each month starts fresh at its own day-of-week, so every day of that month
+ * is contained within its own month block — no days bleed into an adjacent month.
+ */
+private fun buildHeatMonths(year: Int, calendar: Map<Long, Int>): List<HeatMonth> {
     val utc = TimeZone.getTimeZone("UTC")
+
+    // Build day-level lookup: "M/D" -> count (UTC dates)
     val lookup = mutableMapOf<String, Int>()
     val tmpCal = Calendar.getInstance(utc)
     calendar.forEach { (ts, count) ->
@@ -819,32 +832,22 @@ private fun buildHeatWeeks(year: Int, calendar: Map<Long, Int>): List<HeatWeek> 
         }
     }
 
-    // Flat list of days: leading nulls to align Jan 1 with its day-of-week
-    val start = Calendar.getInstance().apply {
-        set(year, Calendar.JANUARY, 1); set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-    }
-    val leadingNulls = start.get(Calendar.DAY_OF_WEEK) - 1  // 0 = Sun
-
-    val flat = mutableListOf<HeatDay?>()
-    repeat(leadingNulls) { flat.add(null) }
-
-    val cur = start.clone() as Calendar
-    while (cur.get(Calendar.YEAR) == year) {
-        val m = cur.get(Calendar.MONTH) + 1
-        val d = cur.get(Calendar.DAY_OF_MONTH)
-        flat.add(HeatDay(month = m, dayOfMonth = d, count = lookup["$m/$d"] ?: 0))
-        cur.add(Calendar.DAY_OF_MONTH, 1)
-    }
-    while (flat.size % 7 != 0) flat.add(null) // trailing pad
-
-    return flat.chunked(7).mapIndexed { idx, days ->
-        val label = when {
-            idx == 0 -> days.firstNotNullOfOrNull { it }?.let { MONTH_SHORT[it.month - 1] }
-            else -> days.firstNotNullOfOrNull { if (it?.dayOfMonth == 1) it else null }
-                ?.let { MONTH_SHORT[it.month - 1] }
+    return (1..12).map { month ->
+        val cal = Calendar.getInstance(utc).apply {
+            set(year, month - 1, 1, 0, 0, 0)
+            set(Calendar.MILLISECOND, 0)
         }
-        HeatWeek(days = days, monthLabel = label)
+        val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val leadingNulls = cal.get(Calendar.DAY_OF_WEEK) - 1 // 0 = Sunday
+
+        val flat = mutableListOf<HeatDay?>()
+        repeat(leadingNulls) { flat.add(null) }
+        for (d in 1..daysInMonth) {
+            flat.add(HeatDay(month = month, dayOfMonth = d, count = lookup["$month/$d"] ?: 0))
+        }
+        while (flat.size % 7 != 0) flat.add(null) // trailing pad to complete last week
+
+        HeatMonth(monthIdx = month - 1, weeks = flat.chunked(7))
     }
 }
 
@@ -990,24 +993,20 @@ private val DAY_LABELS = listOf("S", "M", "T", "W", "T", "F", "S")
 
 @Composable
 private fun SubmissionHeatmap(year: Int, submissionCalendar: Map<Long, Int>) {
-    val weeks = remember(year, submissionCalendar) { buildHeatWeeks(year, submissionCalendar) }
+    val months = remember(year, submissionCalendar) { buildHeatMonths(year, submissionCalendar) }
 
     val cellSize = 11.dp
     val cellGap = 3.dp
-    val weekWidth = cellSize + cellGap
-    val monthLabelHeight = 16.dp
-    val dayLabelWidth = 12.dp
+    val monthLabelHeight = 14.dp
+    val dayLabelWidth = 10.dp
 
-    Row(
-        verticalAlignment = Alignment.Top
-    ) {
+    Row(verticalAlignment = Alignment.Top) {
         // ── Fixed day-of-week labels ─────────────────────────────────────
         Column(
             modifier = Modifier.padding(top = monthLabelHeight + cellGap),
             verticalArrangement = Arrangement.spacedBy(cellGap)
         ) {
             DAY_LABELS.forEachIndexed { idx, label ->
-                // Only show M, W, F to keep it clean (like LeetCode)
                 Text(
                     text = if (idx % 2 == 1) label else "",
                     fontSize = 8.sp,
@@ -1022,42 +1021,35 @@ private fun SubmissionHeatmap(year: Int, submissionCalendar: Map<Long, Int>) {
 
         Spacer(modifier = Modifier.width(4.dp))
 
-        // ── Scrollable weeks ─────────────────────────────────────────────
+        // ── Scrollable month blocks ───────────────────────────────────────
         Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
-            Column {
-                // Month labels row
-                Row {
-                    weeks.forEach { week ->
-                        Box(modifier = Modifier.width(weekWidth)) {
-                            if (week.monthLabel != null) {
-                                Text(
-                                    text = week.monthLabel,
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = TextTertiary,
-                                    softWrap = false,
-                                    overflow = androidx.compose.ui.text.style.TextOverflow.Visible
-                                )
+            months.forEachIndexed { mIdx, heatMonth ->
+                Column {
+                    // Month label
+                    Text(
+                        text = MONTH_SHORT[heatMonth.monthIdx],
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextTertiary,
+                        modifier = Modifier.height(monthLabelHeight)
+                    )
+                    Spacer(modifier = Modifier.height(cellGap))
+                    // Week columns for this month
+                    Row {
+                        heatMonth.weeks.forEachIndexed { wIdx, week ->
+                            Column(verticalArrangement = Arrangement.spacedBy(cellGap)) {
+                                week.forEach { day ->
+                                    HeatCell(count = day?.count, isVisible = day != null)
+                                }
+                            }
+                            if (wIdx != heatMonth.weeks.lastIndex) {
+                                Spacer(modifier = Modifier.width(cellGap))
                             }
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(cellGap))
-
-                // Week columns
-                Row {
-                    weeks.forEachIndexed { wIdx, week ->
-                        Column(verticalArrangement = Arrangement.spacedBy(cellGap)) {
-                            week.days.forEach { day ->
-                                HeatCell(count = day?.count, isVisible = day != null)
-                            }
-                        }
-                        // Month gap: add extra space when next week starts a new month
-                        val nextMonthLabel = weeks.getOrNull(wIdx + 1)?.monthLabel
-                        val gapWidth = if (nextMonthLabel != null && wIdx != weeks.lastIndex) cellGap * 2 else cellGap
-                        Spacer(modifier = Modifier.width(gapWidth))
-                    }
+                if (mIdx != months.lastIndex) {
+                    Spacer(modifier = Modifier.width(cellGap * 3))
                 }
             }
         }
@@ -1070,10 +1062,10 @@ private fun HeatCell(count: Int?, isVisible: Boolean) {
     val color = when {
         !isVisible || count == null -> Color.Transparent
         count == 0 -> CardElevated
-        count == 1 -> SuccessGreenText.copy(alpha = 0.22f)
-        count <= 3 -> SuccessGreenText.copy(alpha = 0.44f)
-        count <= 6 -> SuccessGreenText.copy(alpha = 0.68f)
-        else -> SuccessGreenText
+        count == 1 -> LeetcodeOrange.copy(alpha = 0.22f)
+        count <= 3 -> LeetcodeOrange.copy(alpha = 0.44f)
+        count <= 6 -> LeetcodeOrange.copy(alpha = 0.68f)
+        else -> LeetcodeOrange
     }
     Box(
         modifier = Modifier
@@ -1096,10 +1088,10 @@ private fun HeatmapLegend() {
         Spacer(Modifier.width(4.dp))
         listOf(
             CardElevated,
-            SuccessGreenText.copy(alpha = 0.22f),
-            SuccessGreenText.copy(alpha = 0.44f),
-            SuccessGreenText.copy(alpha = 0.68f),
-            SuccessGreenText
+            LeetcodeOrange.copy(alpha = 0.22f),
+            LeetcodeOrange.copy(alpha = 0.44f),
+            LeetcodeOrange.copy(alpha = 0.68f),
+            LeetcodeOrange
         ).forEach { bg ->
             Box(
                 modifier = Modifier
@@ -1110,5 +1102,141 @@ private fun HeatmapLegend() {
             Spacer(Modifier.width(3.dp))
         }
         Text("More", fontSize = 9.sp, color = TextDisabled)
+    }
+}
+
+// ── Badges Card ───────────────────────────────────────────────────────────────
+
+@Composable
+private fun BadgesCard(badges: List<UserBadge>) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = BackgroundCard),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, CardBorder, RoundedCornerShape(20.dp))
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("🏅", fontSize = 18.sp)
+                    Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                        Text(
+                            "BADGES",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = TextDisabled,
+                            letterSpacing = 1.5.sp
+                        )
+                        Text(
+                            "Earned achievements",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextPrimary
+                        )
+                    }
+                }
+                Surface(
+                    color = LeetcodeOrange.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Text(
+                        "${badges.size}",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = LeetcodeOrange
+                    )
+                }
+            }
+
+            HorizontalDivider(color = CardBorder)
+
+            // Horizontal badge list
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                badges.forEach { badge -> BadgeItem(badge) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BadgeItem(badge: UserBadge) {
+    val iconUrl = badge.icon?.let { path ->
+        if (path.startsWith("http")) path else "https://leetcode.com$path"
+    }
+    val earnedDate = badge.creationDate?.let { raw ->
+        // "YYYY-MM-DD" → "MMM YYYY"
+        try {
+            val parts = raw.split("-")
+            val monthNames = listOf("Jan","Feb","Mar","Apr","May","Jun",
+                "Jul","Aug","Sep","Oct","Nov","Dec")
+            val m = parts[1].toInt() - 1
+            "${monthNames[m]} ${parts[0]}"
+        } catch (e: Exception) { raw }
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.width(80.dp)
+    ) {
+        // Badge icon circle
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(64.dp)
+                .clip(CircleShape)
+                .background(CardElevated)
+                .border(1.dp, LeetcodeOrange.copy(alpha = 0.25f), CircleShape)
+        ) {
+            if (iconUrl != null) {
+                AsyncImage(
+                    model = iconUrl,
+                    contentDescription = badge.displayName,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                )
+            } else {
+                Text("🏅", fontSize = 28.sp)
+            }
+        }
+
+        // Badge name
+        Text(
+            text = badge.displayName ?: "Badge",
+            fontSize = 10.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TextPrimary,
+            textAlign = TextAlign.Center,
+            lineHeight = 13.sp,
+            maxLines = 2,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+        )
+
+        // Earned date
+        if (earnedDate != null) {
+            Text(
+                text = earnedDate,
+                fontSize = 9.sp,
+                color = TextDisabled,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }

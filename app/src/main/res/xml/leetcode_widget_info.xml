@@ -8,4 +8,5 @@
     android:updatePeriodMillis="3600000"
     android:initialLayout="@layout/widget_leetcode_stats"
     android:widgetCategory="home_screen"
-    android:previewImage="@mipmap/ic_launcher" />
+    android:previewImage="@mipmap/ic_launcher"
+    android:previewLayout="@layout/widget_leetcode_stats" />

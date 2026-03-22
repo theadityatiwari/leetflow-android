@@ -1,6 +1,7 @@
 package com.nativeknights.leetflow.ui.screens.leetcodestats
 
 import com.nativeknights.leetflow.data.models.ContestHistory
+import com.nativeknights.leetflow.data.models.UserBadge
 
 data class LeetCodeStats(
     val username: String,
@@ -25,7 +26,8 @@ data class LeetCodeStats(
     val contestGlobalRank: Int?,
     val attendedContests: Int?,
     val topPercentage: Double?,
-    val contestHistory: List<ContestHistory>
+    val contestHistory: List<ContestHistory>,
+    val badges: List<UserBadge>
 )
 
 sealed class LeetCodeStatsUiState {
