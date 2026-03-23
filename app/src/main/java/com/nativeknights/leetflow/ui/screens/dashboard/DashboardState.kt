@@ -69,12 +69,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     private fun getGreeting(): String {
         val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
-        return when (hour) {
-            in 0..11 -> "Good Morning"
-            in 12..16 -> "Good Afternoon"
-            in 17..20 -> "Good Evening"
-            else -> "Good Night"
-        }
+        return getGreeting(hour) // delegates to the testable pure function in GreetingUtils.kt
     }
 
     fun checkRateDialog() {
